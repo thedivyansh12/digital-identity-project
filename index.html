@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identity For Everyone</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+body{
+font-family: Arial, Helvetica, sans-serif;
+margin:0;
+background:#f5f7fb;
+}
+
+nav{
+background:#111827;
+color:white;
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+nav button{
+padding:8px 14px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+padding:30px;
+}
+
+.card{
+background:white;
+padding:25px;
+border-radius:10px;
+box-shadow:0 4px 10px rgba(0,0,0,0.08);
+margin-top:20px;
+}
+
+h1,h2{
+margin-top:0;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:8px;
+margin-bottom:16px;
+border:1px solid #ccc;
+border-radius:6px;
+}
+
+button.primary{
+background:#2563eb;
+color:white;
+padding:12px 18px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+#idCard{
+display:none;
+}
+
+.badge{
+background:#16a34a;
+color:white;
+padding:4px 10px;
+border-radius:6px;
+font-size:12px;
+margin-left:10px;
+}
+
+.hidden{
+display:none;
+}
+
+.section{
+display:none;
+}
+
+.active{
+display:block;
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+<div><strong>Identity For Everyone</strong></div>
+<div>
+<button onclick="showSection('home')">Home</button>
+<button onclick="showSection('create')">Create ID</button>
+<button onclick="showSection('verify')">Verify</button>
+</div>
+</nav>
+
+<div class="container">
+
+<section id="home" class="section active">
+<div class="card">
+<h1>Portable Digital Identity</h1>
+<p>Millions of people worldwide cannot access healthcare, banking, or education because they lack official identity documents.</p>
+
+<h2>Our Solution</h2>
+<p>This platform allows NGOs to create a secure digital identity for undocumented individuals. Each identity generates a QR code which can be verified instantly by hospitals, aid organizations, and service providers.</p>
+
+<button class="primary" onclick="showSection('create')">Create Digital Identity</button>
+</div>
+</section>
+
+<section id="create" class="section">
+<div class="card">
+<h2>Create Digital Identity</h2>
+
+<label>Name</label>
+<input id="name" type="text">
+
+<label>Date of Birth</label>
+<input id="dob" type="date">
+
+<label>Country</label>
+<input id="country" type="text">
+
+<label>Verifying Organization</label>
+<input id="org" type="text">
+
+<button class="primary" onclick="generateID()">Generate Digital ID</button>
+</div>
+
+<div id="idCard" class="card">
+<h2>Digital Identity Card <span class="badge">Verified</span></h2>
+
+<p><strong>Name:</strong> <span id="cardName"></span></p>
+<p><strong>DOB:</strong> <span id="cardDob"></span></p>
+<p><strong>Country:</strong> <span id="cardCountry"></span></p>
+<p><strong>Verified By:</strong> <span id="cardOrg"></span></p>
+<p><strong>ID Number:</strong> <span id="cardID"></span></p>
+
+<div id="qrcode"></div>
+
+<p>Use this QR code to verify identity.</p>
+</div>
+</section>
+
+<section id="verify" class="section">
+<div class="card">
+<h2>Verify Identity</h2>
+<p>Enter the ID number to verify the identity.</p>
+
+<input id="verifyID" placeholder="Enter ID">
+<button class="primary" onclick="verifyIdentity()">Verify</button>
+
+<div id="verifyResult" class="hidden">
+<h3>Identity Verified <span class="badge">Valid</span></h3>
+<p id="verifyData"></p>
+</div>
+</div>
+</section>
+
+</div>
+
+<script>
+
+function showSection(section){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
+document.getElementById(section).classList.add('active')
+}
+
+let storedIdentity=null
+
+function generateID(){
+
+const name=document.getElementById('name').value
+const dob=document.getElementById('dob').value
+const country=document.getElementById('country').value
+const org=document.getElementById('org').value
+
+const id="ID"+Math.floor(Math.random()*1000000)
+
+storedIdentity={name,dob,country,org,id}
+
+
+document.getElementById('cardName').innerText=name
+
+document.getElementById('cardDob').innerText=dob
+
+document.getElementById('cardCountry').innerText=country
+
+document.getElementById('cardOrg').innerText=org
+
+document.getElementById('cardID').innerText=id
+
+
+let qrContainer=document.getElementById('qrcode')
+qrContainer.innerHTML=""
+
+new QRCode(qrContainer,{
+text:id,
+width:150,
+height:150
+})
+
+
+document.getElementById('idCard').style.display='block'
+
+}
+
+function verifyIdentity(){
+
+const input=document.getElementById('verifyID').value
+
+if(storedIdentity && input===storedIdentity.id){
+
+document.getElementById('verifyResult').classList.remove('hidden')
+
+document.getElementById('verifyData').innerText=
+"Name: "+storedIdentity.name+" | Country: "+storedIdentity.country+" | Verified by: "+storedIdentity.org
+
+}else{
+alert('Identity not found')
+}
+
+}
+
+</script>
+
+</body>
+</html>
