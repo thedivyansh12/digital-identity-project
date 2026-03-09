@@ -4,233 +4,811 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Identity For Everyone</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-body{
-font-family: Arial, Helvetica, sans-serif;
-margin:0;
-background:#f5f7fb;
+:root {
+  --ink:#0f1923; --paper:#f7f4ef; --cream:#ede9e1;
+  --teal:#0d7377; --teal-light:#14a085; --teal-dim:#0d737718;
+  --red:#c0392b; --muted:#6b7280; --border:#ddd8cf;
+  --white:#ffffff;
+  --shadow:0 4px 24px rgba(15,25,35,0.10);
+  --shadow-lg:0 12px 48px rgba(15,25,35,0.14);
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);min-height:100vh}
 
-nav{
-background:#111827;
-color:white;
-padding:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+/* AUTH */
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink);position:relative;overflow:hidden}
+#authScreen::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,var(--teal) 0%,transparent 70%);opacity:0.18}
+#authScreen::after{content:'';position:absolute;bottom:-80px;left:-80px;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,#203a43 0%,transparent 70%);opacity:0.4}
+.auth-box{background:white;border-radius:20px;padding:44px 40px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,0.3);position:relative;z-index:1;animation:fadeUp 0.4s ease}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.auth-logo-icon{width:40px;height:40px;background:var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.auth-logo span{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink)}
+.auth-tabs{display:flex;border-radius:8px;background:var(--paper);padding:4px;margin-bottom:28px}
+.auth-tab{flex:1;padding:9px;border:none;background:transparent;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;color:var(--muted);transition:all 0.2s}
+.auth-tab.active{background:white;color:var(--ink);box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.auth-form{display:none}
+.auth-form.active{display:block;animation:fadeUp 0.25s ease}
+.auth-title{font-family:'DM Serif Display',serif;font-size:1.5rem;font-weight:400;margin-bottom:6px}
+.auth-sub{font-size:13.5px;color:var(--muted);margin-bottom:24px;line-height:1.5}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--ink);margin-bottom:6px}
+.field input{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:var(--ink);background:var(--paper);outline:none;transition:all 0.2s}
+.field input:focus{border-color:var(--teal);background:white;box-shadow:0 0 0 3px var(--teal-dim)}
+.field-hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+.auth-error{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none}
+.btn-full{width:100%;padding:13px;background:var(--teal);color:white;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;margin-top:4px}
+.btn-full:hover{background:var(--teal-light);transform:translateY(-1px);box-shadow:0 6px 20px rgba(13,115,119,0.3)}
+.auth-footer{font-size:12px;color:var(--muted);text-align:center;margin-top:20px;line-height:1.8}
 
-nav button{
-padding:8px 14px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
+/* APP */
+#appScreen{display:none}
+nav{background:var(--ink);padding:0 32px;display:flex;justify-content:space-between;align-items:center;height:64px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.25);flex-wrap:wrap;gap:8px}
+.nav-logo{display:flex;align-items:center;gap:10px;color:white}
+.nav-logo-icon{width:32px;height:32px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-logo span{font-family:'DM Serif Display',serif;font-size:18px}
+.nav-center{display:flex;gap:4px}
+.nav-btn{background:transparent;color:rgba(255,255,255,0.7);border:none;padding:8px 16px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s}
+.nav-btn:hover,.nav-btn.active-nav{background:rgba(255,255,255,0.1);color:white}
+.nav-right{display:flex;align-items:center;gap:12px}
+.nav-user{display:flex;align-items:center;gap:8px;color:rgba(255,255,255,0.7);font-size:13px}
+.nav-avatar{width:30px;height:30px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white}
+.btn-logout{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.15);padding:6px 14px;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s}
+.btn-logout:hover{background:rgba(255,255,255,0.15);color:white}
 
-.container{
-max-width:900px;
-margin:auto;
-padding:30px;
-}
+.container{max-width:960px;margin:0 auto;padding:40px 24px 80px}
+.section{display:none;animation:fadeUp 0.35s ease}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-.card{
-background:white;
-padding:25px;
-border-radius:10px;
-box-shadow:0 4px 10px rgba(0,0,0,0.08);
-margin-top:20px;
-}
+/* CARDS */
+.card{background:var(--white);border-radius:16px;padding:36px;box-shadow:var(--shadow);margin-bottom:24px;border:1px solid var(--border)}
 
-h1,h2{
-margin-top:0;
-}
+/* HERO */
+.hero{background:var(--ink);border-radius:20px;padding:56px 48px;color:white;position:relative;overflow:hidden;margin-bottom:28px}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,var(--teal) 0%,transparent 70%);opacity:0.25}
+.hero-tag{display:inline-block;background:var(--teal);color:white;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;padding:5px 12px;border-radius:20px;margin-bottom:20px}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(2rem,4vw,3rem);line-height:1.15;margin-bottom:16px;font-weight:400}
+.hero h1 em{font-style:italic;color:#7ed6c1}
+.hero p{font-size:16px;color:rgba(255,255,255,0.72);max-width:520px;line-height:1.7;margin-bottom:32px}
+.stats-row{display:flex;gap:32px;margin-bottom:36px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column}
+.stat-num{font-family:'DM Serif Display',serif;font-size:2rem;color:#7ed6c1}
+.stat-label{font-size:12px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:0.07em;margin-top:2px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn-primary{background:var(--teal);color:white;border:none;padding:13px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{background:var(--teal-light);transform:translateY(-1px);box-shadow:0 6px 20px rgba(13,115,119,0.3)}
+.btn-outline{background:transparent;color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.25);padding:13px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:500;cursor:pointer;transition:all 0.2s}
+.btn-outline:hover{border-color:rgba(255,255,255,0.6);color:white}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.feature-card{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:28px;transition:all 0.2s}
+.feature-card:hover{box-shadow:var(--shadow);transform:translateY(-2px)}
+.feature-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px;background:var(--teal-dim)}
+.feature-card h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.feature-card p{font-size:13.5px;color:var(--muted);line-height:1.6}
 
-input{
-width:100%;
-padding:10px;
-margin-top:8px;
-margin-bottom:16px;
-border:1px solid #ccc;
-border-radius:6px;
-}
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column}
+.form-group.full{grid-column:1/-1}
+.form-group label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;letter-spacing:0.02em;text-transform:uppercase}
+.form-group input,.form-group select,.form-group textarea{padding:11px 14px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14.5px;color:var(--ink);background:var(--paper);transition:all 0.2s;outline:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-dim);background:white}
+.form-group textarea{resize:vertical;min-height:80px}
+.form-hint{font-size:11.5px;color:var(--muted);margin-top:4px}
+.photo-upload{border:2px dashed var(--border);border-radius:10px;padding:28px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--paper);position:relative}
+.photo-upload:hover{border-color:var(--teal);background:var(--teal-dim)}
+.photo-upload input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;border:none;padding:0;background:none}
+.photo-preview{width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:10px;display:none;border:3px solid var(--teal)}
+.photo-upload-icon{font-size:28px;margin-bottom:8px}
+.photo-upload p{font-size:13px;color:var(--muted);margin:0}
+.section-heading{font-family:'DM Serif Display',serif;font-size:1.6rem;font-weight:400;margin-bottom:6px}
+.section-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+.divider{border:none;border-top:1px solid var(--border);margin:28px 0}
+.btn-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn-dark{background:var(--ink);color:white;border:none;padding:13px 24px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:8px}
+.btn-dark:hover{background:#1e293b;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border);padding:12px 20px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
 
-button.primary{
-background:#2563eb;
-color:white;
-padding:12px 18px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-}
+/* ID CARD */
+.id-card-wrap{display:none;animation:fadeUp 0.4s ease}
+.id-card{background:linear-gradient(135deg,#0f2027 0%,#0d7377 50%,#203a43 100%);border-radius:20px;padding:36px;color:white;position:relative;overflow:hidden;margin-bottom:24px;box-shadow:var(--shadow-lg)}
+.id-card::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)}
+.id-card::after{content:'';position:absolute;bottom:-40px;left:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06)}
+.id-card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px}
+.id-card-org{font-size:11px;text-transform:uppercase;letter-spacing:0.12em;color:rgba(255,255,255,0.55);margin-bottom:4px}
+.id-card-title{font-family:'DM Serif Display',serif;font-size:1.15rem;font-weight:400}
+.id-verified-badge{background:rgba(22,163,74,0.25);border:1px solid rgba(22,163,74,0.5);color:#4ade80;font-size:11px;font-weight:600;padding:5px 12px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.id-card-body{display:flex;gap:28px;align-items:flex-start}
+.id-card-photo{width:80px;height:80px;border-radius:12px;border:2px solid rgba(255,255,255,0.2);flex-shrink:0;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden}
+.id-card-photo img{width:80px;height:80px;object-fit:cover;display:none}
+.id-card-info{flex:1}
+.id-card-name{font-family:'DM Serif Display',serif;font-size:1.5rem;font-weight:400;margin-bottom:12px;line-height:1.2}
+.id-fields{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.id-field label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.45);display:block;margin-bottom:3px}
+.id-field span{font-size:13.5px;font-weight:500}
+.id-card-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:28px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);position:relative;z-index:1}
+.id-card-id{font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.08em}
+.id-card-id strong{display:block;font-size:13px;color:rgba(255,255,255,0.8);font-family:monospace;letter-spacing:0.15em;margin-top:2px}
+.qr-wrap{background:white;padding:8px;border-radius:8px}
 
-#idCard{
-display:none;
-}
+/* ACTIONS */
+.actions-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px}
+.action-card{background:white;border:1.5px solid var(--border);border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all 0.2s}
+.action-card:hover{border-color:var(--teal);background:var(--teal-dim);transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,115,119,0.12)}
+.action-card-icon{font-size:24px;margin-bottom:10px}
+.action-card-label{font-size:13px;font-weight:600;color:var(--ink)}
+.action-card-sub{font-size:11.5px;color:var(--muted);margin-top:3px}
 
-.badge{
-background:#16a34a;
-color:white;
-padding:4px 10px;
-border-radius:6px;
-font-size:12px;
-margin-left:10px;
-}
+/* VERIFY */
+.verify-methods{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+.method-tab{padding:10px 20px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;background:white;color:var(--muted);transition:all 0.2s}
+.method-tab.active{border-color:var(--teal);background:var(--teal-dim);color:var(--teal)}
+.verify-method{display:none}
+.verify-method.active{display:block}
+.verify-result{display:none;margin-top:24px;border-radius:14px;overflow:hidden;animation:fadeUp 0.3s ease}
+.verify-result.success .result-header{background:#16a34a;color:white;padding:20px 24px;display:flex;align-items:center;gap:12px}
+.verify-result.fail .result-header{background:var(--red);color:white;padding:20px 24px;display:flex;align-items:center;gap:12px}
+.result-icon{font-size:24px}
+.result-header h3{font-size:17px;margin:0;font-weight:600}
+.result-header p{font-size:13px;opacity:0.85;margin:3px 0 0}
+.result-body{background:white;border:1px solid var(--border);border-top:none;padding:24px;border-radius:0 0 14px 14px}
+.result-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px}
+.result-field label{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);display:block;margin-bottom:4px}
+.result-field span{font-size:15px;font-weight:600;color:var(--ink)}
 
-.hidden{
-display:none;
-}
+/* REGISTRY */
+.history-list{display:flex;flex-direction:column;gap:14px}
+.history-item{display:flex;align-items:center;gap:16px;padding:16px 20px;background:var(--paper);border-radius:10px;border:1px solid var(--border);cursor:pointer;transition:all 0.2s}
+.history-item:hover{background:white;box-shadow:var(--shadow)}
+.history-avatar{width:44px;height:44px;border-radius:50%;background:var(--teal-dim);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden}
+.history-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.history-info{flex:1}
+.history-name{font-weight:600;font-size:15px}
+.history-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.history-id{font-family:monospace;font-size:11px;background:var(--teal-dim);color:var(--teal);padding:4px 8px;border-radius:4px;white-space:nowrap}
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted)}
+.empty-state .empty-icon{font-size:40px;margin-bottom:12px;opacity:0.4}
+.empty-state p{font-size:14px}
+.search-bar{position:relative;margin-bottom:20px}
+.search-bar input{width:100%;padding:11px 14px 11px 40px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;background:var(--paper);outline:none;transition:border-color 0.2s}
+.search-bar input:focus{border-color:var(--teal);background:white}
+.search-bar::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;opacity:0.5}
+.filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+.filter-btn{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:white;font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:500;cursor:pointer;transition:all 0.2s;color:var(--muted)}
+.filter-btn.active,.filter-btn:hover{border-color:var(--teal);background:var(--teal-dim);color:var(--teal)}
 
-.section{
-display:none;
-}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:24px}
+.modal-overlay.open{display:flex;animation:fadeUp 0.25s ease}
+.modal{background:white;border-radius:16px;padding:36px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,0.25)}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.modal-title{font-family:'DM Serif Display',serif;font-size:1.4rem;font-weight:400}
+.modal-close{background:var(--paper);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+.modal-close:hover{background:var(--cream)}
 
-.active{
-display:block;
-}
+/* TOAST */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:10px}
+.toast{background:var(--ink);color:white;padding:14px 20px;border-radius:10px;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,0.2);display:flex;align-items:center;gap:10px;animation:slideIn 0.3s ease;min-width:240px}
+.toast.success{background:#16a34a}
+.toast.error{background:var(--red)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* TAGS */
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:4px 10px;border-radius:20px}
+.tag-green{background:#dcfce7;color:#16a34a}
+
+/* MISC */
+.note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;font-size:13px;color:#92400e;display:flex;gap:8px;align-items:flex-start;margin-top:16px}
+.steps{display:flex;align-items:center;gap:0;margin-bottom:32px;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:500;color:var(--muted)}
+.step.active{color:var(--teal)}
+.step.done{color:#16a34a}
+.step-num{width:28px;height:28px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.step.done .step-num{background:#16a34a;border-color:#16a34a;color:white}
+.step.active .step-num{background:var(--teal);border-color:var(--teal);color:white}
+.step-connector{flex:1;height:1px;background:var(--border);margin:0 12px;min-width:24px}
+
+@media print{nav,.actions-row,.btn-row,#authScreen{display:none !important}.id-card-wrap{display:block !important}body{background:white}}
 </style>
 </head>
-
 <body>
 
-<nav>
-<div><strong>Identity For Everyone</strong></div>
-<div>
-<button onclick="showSection('home')">Home</button>
-<button onclick="showSection('create')">Create ID</button>
-<button onclick="showSection('verify')">Verify</button>
+<!-- ── AUTH SCREEN ── -->
+<div id="authScreen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">🪪</div>
+      <span>Identity For Everyone</span>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-form active" id="formLogin">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to access your identity registry.</div>
+      <div class="auth-error" id="loginError"></div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="loginUsername" placeholder="Enter your username" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="btn-full" onclick="doLogin()">Sign In &rarr;</button>
+      <div class="auth-footer">
+        Don't have an account? <a href="#" onclick="switchAuthTab('register')" style="color:var(--teal)">Register here</a><br>
+        <small style="opacity:0.6">Demo account &mdash; username: <strong>admin</strong> &nbsp;|&nbsp; password: <strong>admin123</strong></small>
+      </div>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="auth-form" id="formRegister">
+      <div class="auth-title">Create account</div>
+      <div class="auth-sub">Register your organization to start issuing digital identities.</div>
+      <div class="auth-error" id="registerError"></div>
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Your full name">
+      </div>
+      <div class="field">
+        <label>Organization</label>
+        <input type="text" id="regOrg" placeholder="e.g. UNHCR Kenya">
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="regUsername" placeholder="Choose a username">
+        <div class="field-hint">At least 4 characters, no spaces</div>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="regPassword" placeholder="Choose a strong password" onkeydown="if(event.key==='Enter')doRegister()">
+        <div class="field-hint">Minimum 6 characters</div>
+      </div>
+      <button class="btn-full" onclick="doRegister()">Create Account &rarr;</button>
+      <div class="auth-footer">
+        Already have an account? <a href="#" onclick="switchAuthTab('login')" style="color:var(--teal)">Sign in</a>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- ── MAIN APP ── -->
+<div id="appScreen">
+
+<nav>
+  <div class="nav-logo">
+    <div class="nav-logo-icon">🪪</div>
+    <span>Identity For Everyone</span>
+  </div>
+  <div class="nav-center">
+    <button class="nav-btn active-nav" id="nav-home"     onclick="showSection('home')">Home</button>
+    <button class="nav-btn"            id="nav-create"   onclick="showSection('create')">Create ID</button>
+    <button class="nav-btn"            id="nav-verify"   onclick="showSection('verify')">Verify</button>
+    <button class="nav-btn"            id="nav-registry" onclick="showSection('registry')">Registry</button>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="navAvatar">?</div>
+      <span id="navUsername">—</span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+  </div>
 </nav>
 
 <div class="container">
 
-<section id="home" class="section active">
-<div class="card">
-<h1>Portable Digital Identity</h1>
-<p>Millions of people worldwide cannot access healthcare, banking, or education because they lack official identity documents.</p>
+  <!-- HOME -->
+  <section id="home" class="section active">
+    <div class="hero">
+      <div class="hero-tag">🌍 Open Access Platform</div>
+      <h1>A <em>dignified identity</em><br>for every person</h1>
+      <p>Millions of people worldwide cannot access healthcare, banking, or education because they lack official documents. We're changing that — one digital ID at a time.</p>
+      <div class="stats-row">
+        <div class="stat"><span class="stat-num" id="statCount">0</span><span class="stat-label">IDs in Your Registry</span></div>
+        <div class="stat"><span class="stat-num">1B+</span><span class="stat-label">Undocumented Globally</span></div>
+        <div class="stat"><span class="stat-num">195</span><span class="stat-label">Countries Supported</span></div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showSection('create')">&#xFF0B; Create Digital Identity</button>
+        <button class="btn-outline" onclick="showSection('verify')">&#10003; Verify an Identity</button>
+      </div>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">🔐</div><h3>Tamper-Proof IDs</h3><p>Each identity receives a unique verifiable ID with QR code authentication that cannot be duplicated.</p></div>
+      <div class="feature-card"><div class="feature-icon">⚡</div><h3>Instant Verification</h3><p>Service providers can verify identity in seconds using the QR code or ID number.</p></div>
+      <div class="feature-card"><div class="feature-icon">💾</div><h3>Persistent Storage</h3><p>All records are saved to your browser's local storage — data survives page refreshes and restarts.</p></div>
+      <div class="feature-card"><div class="feature-icon">🔒</div><h3>Account Protected</h3><p>Your registry is locked to your account. Only you can view, create, or manage records.</p></div>
+    </div>
+  </section>
 
-<h2>Our Solution</h2>
-<p>This platform allows NGOs to create a secure digital identity for undocumented individuals. Each identity generates a QR code which can be verified instantly by hospitals, aid organizations, and service providers.</p>
+  <!-- CREATE -->
+  <section id="create" class="section">
+    <h2 class="section-heading">Create Digital Identity</h2>
+    <p class="section-sub">Fill in the individual's details. Fields marked * are required.</p>
+    <div class="steps">
+      <div class="step done"><div class="step-num">&#10003;</div><span>Personal Info</span></div>
+      <div class="step-connector"></div>
+      <div class="step active"><div class="step-num">2</div><span>Organization</span></div>
+      <div class="step-connector"></div>
+      <div class="step"><div class="step-num">3</div><span>Review &amp; Issue</span></div>
+    </div>
+    <div class="card">
+      <div class="form-grid">
+        <div class="form-group full" style="align-items:center">
+          <label>Photo (optional)</label>
+          <div class="photo-upload" id="photoUpload">
+            <input type="file" id="photoInput" accept="image/*" onchange="previewPhoto(this)">
+            <img class="photo-preview" id="photoPreview">
+            <div class="photo-upload-icon" id="photoIcon">📷</div>
+            <p id="photoText">Click to upload a photo</p>
+          </div>
+        </div>
+        <div class="form-group"><label>Full Name *</label><input id="name" type="text" placeholder="e.g. Amara Diallo"></div>
+        <div class="form-group"><label>Date of Birth *</label><input id="dob" type="date"></div>
+        <div class="form-group"><label>Country of Origin *</label><input id="country" type="text" placeholder="e.g. South Sudan"></div>
+        <div class="form-group">
+          <label>Gender</label>
+          <select id="gender">
+            <option value="">— Select —</option>
+            <option>Male</option><option>Female</option><option>Non-binary</option><option>Prefer not to say</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Languages Spoken</label><input id="languages" type="text" placeholder="e.g. Arabic, French"></div>
+        <div class="form-group"><label>Current Location</label><input id="location" type="text" placeholder="e.g. Kakuma Refugee Camp"></div>
+        <div class="form-group"><label>Issuing Organization *</label><input id="org" type="text" placeholder="e.g. UNHCR Kenya"></div>
+        <div class="form-group"><label>Organization Contact</label><input id="orgContact" type="text" placeholder="e.g. +254 700 000 000"></div>
+        <div class="form-group"><label>Case / Reference Number</label><input id="caseNum" type="text" placeholder="Optional internal ref"><span class="form-hint">For your organization's records</span></div>
+        <div class="form-group"><label>ID Expiry</label><input id="expiry" type="date"><span class="form-hint">Leave blank for no expiry</span></div>
+        <div class="form-group full"><label>Notes</label><textarea id="notes" placeholder="Any relevant medical, support, or access needs..."></textarea></div>
+      </div>
+      <hr class="divider">
+      <div class="btn-row">
+        <button class="btn-dark" onclick="generateID()">&#11041; Generate Digital ID</button>
+        <button class="btn-ghost" onclick="clearForm()">&#10005; Clear Form</button>
+      </div>
+      <div class="note">💾 <span>All created IDs are automatically saved to your account and will persist across sessions.</span></div>
+    </div>
 
-<button class="primary" onclick="showSection('create')">Create Digital Identity</button>
+    <!-- ID CARD OUTPUT -->
+    <div class="id-card-wrap" id="idCardWrap">
+      <h3 style="font-family:'DM Serif Display',serif;font-size:1.2rem;font-weight:400;margin-bottom:16px;">🎉 Identity Successfully Created &amp; Saved</h3>
+      <div class="id-card" id="printableCard">
+        <div class="id-card-header">
+          <div>
+            <div class="id-card-org">Identity For Everyone — Digital ID</div>
+            <div class="id-card-title">Humanitarian Identity Document</div>
+          </div>
+          <div class="id-verified-badge">&#10003; Verified</div>
+        </div>
+        <div class="id-card-body">
+          <div class="id-card-photo" id="cardPhotoWrap">
+            <img id="cardPhoto" src="" alt="">
+            <span id="cardPhotoPlaceholder">👤</span>
+          </div>
+          <div class="id-card-info">
+            <div class="id-card-name" id="cardName"></div>
+            <div class="id-fields">
+              <div class="id-field"><label>Date of Birth</label><span id="cardDob"></span></div>
+              <div class="id-field"><label>Country</label><span id="cardCountry"></span></div>
+              <div class="id-field"><label>Gender</label><span id="cardGender"></span></div>
+              <div class="id-field"><label>Current Location</label><span id="cardLocation"></span></div>
+              <div class="id-field"><label>Languages</label><span id="cardLanguages"></span></div>
+              <div class="id-field"><label>Issued By</label><span id="cardOrg"></span></div>
+              <div class="id-field"><label>Valid Until</label><span id="cardExpiry"></span></div>
+              <div class="id-field"><label>Status</label><span><span class="tag tag-green">&#9679; Active</span></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="id-card-footer">
+          <div class="id-card-id">ID Number<strong id="cardID"></strong></div>
+          <div class="qr-wrap"><div id="qrcode"></div></div>
+        </div>
+      </div>
+      <div class="actions-row">
+        <div class="action-card" onclick="window.print()"><div class="action-card-icon">🖨️</div><div class="action-card-label">Print Card</div><div class="action-card-sub">Physical copy</div></div>
+        <div class="action-card" onclick="downloadCard()"><div class="action-card-icon">⬇️</div><div class="action-card-label">Download</div><div class="action-card-sub">Save as HTML</div></div>
+        <div class="action-card" onclick="copyIDNumber()"><div class="action-card-icon">📋</div><div class="action-card-label">Copy ID</div><div class="action-card-sub">Clipboard</div></div>
+        <div class="action-card" onclick="showSection('verify')"><div class="action-card-icon">✓</div><div class="action-card-label">Verify Now</div><div class="action-card-sub">Test this ID</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VERIFY -->
+  <section id="verify" class="section">
+    <h2 class="section-heading">Verify Identity</h2>
+    <p class="section-sub">Service providers can verify an identity using the ID number or name below.</p>
+    <div class="card">
+      <div class="verify-methods">
+        <button class="method-tab active" onclick="switchMethod('byId',this)">🔢 By ID Number</button>
+        <button class="method-tab" onclick="switchMethod('byName',this)">👤 By Name Lookup</button>
+      </div>
+      <div class="verify-method active" id="byId">
+        <div class="form-group"><label>Identity Number</label><input id="verifyID" placeholder="e.g. IFE-748291" style="font-family:monospace;font-size:16px;letter-spacing:0.08em"></div>
+        <button class="btn-dark" onclick="verifyIdentity()">&#10003; Verify Identity</button>
+      </div>
+      <div class="verify-method" id="byName">
+        <div class="form-group"><label>Full Name</label><input id="verifyName" placeholder="Enter name to search..."></div>
+        <button class="btn-dark" onclick="verifyByName()">🔍 Search Registry</button>
+      </div>
+      <div class="verify-result" id="verifyResult">
+        <div class="result-header"><div class="result-icon" id="resultIcon"></div><div><h3 id="resultTitle"></h3><p id="resultSubtitle"></p></div></div>
+        <div class="result-body" id="resultBody" style="display:none"><div class="result-fields" id="resultFields"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REGISTRY -->
+  <section id="registry" class="section">
+    <h2 class="section-heading">Identity Registry</h2>
+    <p class="section-sub">All identities saved to your account. Data persists across sessions.</p>
+    <div class="card">
+      <div class="search-bar"><input type="text" id="searchInput" placeholder="Search by name, country, or ID..." oninput="renderRegistry()"></div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('active',this)">Active</button>
+        <button class="filter-btn" onclick="setFilter('expired',this)">Expired</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="empty-state"><div class="empty-icon">🪪</div><p>No identities yet. <a href="#" onclick="showSection('create')" style="color:var(--teal)">Create the first one &rarr;</a></p></div>
+      </div>
+    </div>
+  </section>
+
 </div>
-</section>
+</div><!-- /appScreen -->
 
-<section id="create" class="section">
-<div class="card">
-<h2>Create Digital Identity</h2>
-
-<label>Name</label>
-<input id="name" type="text">
-
-<label>Date of Birth</label>
-<input id="dob" type="date">
-
-<label>Country</label>
-<input id="country" type="text">
-
-<label>Verifying Organization</label>
-<input id="org" type="text">
-
-<button class="primary" onclick="generateID()">Generate Digital ID</button>
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Identity Details</div>
+      <button class="modal-close" onclick="closeModal()">&#10005;</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
 </div>
 
-<div id="idCard" class="card">
-<h2>Digital Identity Card <span class="badge">Verified</span></h2>
-
-<p><strong>Name:</strong> <span id="cardName"></span></p>
-<p><strong>DOB:</strong> <span id="cardDob"></span></p>
-<p><strong>Country:</strong> <span id="cardCountry"></span></p>
-<p><strong>Verified By:</strong> <span id="cardOrg"></span></p>
-<p><strong>ID Number:</strong> <span id="cardID"></span></p>
-
-<div id="qrcode"></div>
-
-<p>Use this QR code to verify identity.</p>
-</div>
-</section>
-
-<section id="verify" class="section">
-<div class="card">
-<h2>Verify Identity</h2>
-<p>Enter the ID number to verify the identity.</p>
-
-<input id="verifyID" placeholder="Enter ID">
-<button class="primary" onclick="verifyIdentity()">Verify</button>
-
-<div id="verifyResult" class="hidden">
-<h3>Identity Verified <span class="badge">Valid</span></h3>
-<p id="verifyData"></p>
-</div>
-</div>
-</section>
-
-</div>
+<!-- TOASTS -->
+<div class="toast-container" id="toastContainer"></div>
 
 <script>
+/* ── STORAGE HELPERS ── */
+function uKey(u,k){return 'ife_'+u+'_'+k}
+function loadDB(u){try{return JSON.parse(localStorage.getItem(uKey(u,'ids'))||'[]')}catch(e){return[]}}
+function saveDB(u,db){localStorage.setItem(uKey(u,'ids'),JSON.stringify(db))}
+function loadUsers(){try{return JSON.parse(localStorage.getItem('ife_users')||'{}')}catch(e){return{}}}
+function saveUsers(users){localStorage.setItem('ife_users',JSON.stringify(users))}
+function loadSession(){return localStorage.getItem('ife_session')||null}
+function saveSession(u){localStorage.setItem('ife_session',u)}
+function clearSession(){localStorage.removeItem('ife_session')}
 
-function showSection(section){
-document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'))
-document.getElementById(section).classList.add('active')
+/* ── APP STATE ── */
+var currentUser=null, identityDB=[], currentIdentity=null, activeFilter='all';
+
+/* ── BOOT ── */
+(function(){
+  var users=loadUsers();
+  if(!users['admin']){
+    users['admin']={password:'admin123',name:'Administrator',org:'Identity For Everyone'};
+    saveUsers(users);
+  }
+  var s=loadSession();
+  if(s && loadUsers()[s]) loginSuccess(s);
+})();
+
+/* ── AUTH ── */
+function switchAuthTab(tab){
+  document.getElementById('tabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active',tab==='register');
+  document.getElementById('formLogin').classList.toggle('active',tab==='login');
+  document.getElementById('formRegister').classList.toggle('active',tab==='register');
+  document.getElementById('loginError').style.display='none';
+  document.getElementById('registerError').style.display='none';
 }
 
-let storedIdentity=null
+function showAuthError(id,msg){
+  var el=document.getElementById(id);
+  el.textContent=msg; el.style.display='block';
+}
 
+function doLogin(){
+  var username=document.getElementById('loginUsername').value.trim();
+  var password=document.getElementById('loginPassword').value;
+  if(!username||!password){showAuthError('loginError','Please enter your username and password.');return}
+  var users=loadUsers();
+  if(!users[username]){showAuthError('loginError','Account not found. Please check your username.');return}
+  if(users[username].password!==password){showAuthError('loginError','Incorrect password. Please try again.');return}
+  saveSession(username);
+  loginSuccess(username);
+}
+
+function doRegister(){
+  var name=document.getElementById('regName').value.trim();
+  var org=document.getElementById('regOrg').value.trim();
+  var username=document.getElementById('regUsername').value.trim();
+  var password=document.getElementById('regPassword').value;
+  if(!name||!username||!password){showAuthError('registerError','Please fill in all required fields.');return}
+  if(username.length<4||/\s/.test(username)){showAuthError('registerError','Username must be at least 4 characters with no spaces.');return}
+  if(password.length<6){showAuthError('registerError','Password must be at least 6 characters.');return}
+  var users=loadUsers();
+  if(users[username]){showAuthError('registerError','That username is already taken.');return}
+  users[username]={password:password,name:name,org:org||'Independent'};
+  saveUsers(users);
+  saveSession(username);
+  loginSuccess(username);
+}
+
+function loginSuccess(username){
+  currentUser=username;
+  identityDB=loadDB(username);
+  var users=loadUsers();
+  var user=users[username]||{};
+  document.getElementById('navUsername').textContent=user.name||username;
+  document.getElementById('navAvatar').textContent=(user.name||username)[0].toUpperCase();
+  document.getElementById('authScreen').style.display='none';
+  document.getElementById('appScreen').style.display='block';
+  updateStatCount();
+  showSection('home');
+  toast('Welcome back, '+(user.name||username)+'!','success');
+}
+
+function doLogout(){
+  clearSession();
+  currentUser=null; identityDB=[]; currentIdentity=null;
+  document.getElementById('appScreen').style.display='none';
+  document.getElementById('authScreen').style.display='flex';
+  document.getElementById('loginUsername').value='';
+  document.getElementById('loginPassword').value='';
+  document.getElementById('loginError').style.display='none';
+  toast('Signed out successfully','info');
+}
+
+/* ── NAVIGATION ── */
+function showSection(id){
+  document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active-nav')});
+  var nb=document.getElementById('nav-'+id);
+  if(nb) nb.classList.add('active-nav');
+  if(id==='registry') renderRegistry();
+}
+
+/* ── PHOTO ── */
+function previewPhoto(input){
+  var file=input.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=document.getElementById('photoPreview');
+    img.src=e.target.result; img.style.display='block';
+    document.getElementById('photoIcon').style.display='none';
+    document.getElementById('photoText').textContent='Photo selected ✓';
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── FORM ── */
+function clearForm(){
+  ['name','dob','country','gender','languages','location','org','orgContact','caseNum','expiry','notes'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var img=document.getElementById('photoPreview');
+  img.style.display='none'; img.src='';
+  document.getElementById('photoIcon').style.display='block';
+  document.getElementById('photoText').textContent='Click to upload a photo';
+  document.getElementById('idCardWrap').style.display='none';
+  toast('Form cleared','info');
+}
+
+function updateStatCount(){
+  document.getElementById('statCount').textContent=identityDB.length;
+}
+
+/* ── GENERATE ID ── */
 function generateID(){
+  var name=document.getElementById('name').value.trim();
+  var dob=document.getElementById('dob').value;
+  var country=document.getElementById('country').value.trim();
+  var org=document.getElementById('org').value.trim();
+  if(!name||!dob||!country||!org){toast('Please fill in all required fields (Name, DOB, Country, Organization)','error');return}
 
-const name=document.getElementById('name').value
-const dob=document.getElementById('dob').value
-const country=document.getElementById('country').value
-const org=document.getElementById('org').value
+  var id='IFE-'+Math.floor(100000+Math.random()*900000);
+  var gender=document.getElementById('gender').value||'—';
+  var languages=document.getElementById('languages').value||'—';
+  var location=document.getElementById('location').value||'—';
+  var orgContact=document.getElementById('orgContact').value||'—';
+  var caseNum=document.getElementById('caseNum').value||'—';
+  var expiry=document.getElementById('expiry').value||'No Expiry';
+  var notes=document.getElementById('notes').value||'';
+  var photoEl=document.getElementById('photoPreview');
+  var photo=(photoEl && photoEl.src && photoEl.src.startsWith('data:'))?photoEl.src:'';
+  var issuedAt=new Date().toISOString().split('T')[0];
 
-const id="ID"+Math.floor(Math.random()*1000000)
+  currentIdentity={id:id,name:name,dob:dob,country:country,org:org,gender:gender,languages:languages,location:location,orgContact:orgContact,caseNum:caseNum,expiry:expiry,notes:notes,photo:photo,issuedAt:issuedAt,issuedBy:currentUser};
+  identityDB.push(currentIdentity);
+  saveDB(currentUser,identityDB);
+  updateStatCount();
+  renderIDCard(currentIdentity);
+  document.getElementById('idCardWrap').style.display='block';
+  document.getElementById('idCardWrap').scrollIntoView({behavior:'smooth',block:'start'});
+  toast('ID '+id+' saved for '+name,'success');
+}
 
-storedIdentity={name,dob,country,org,id}
+function renderIDCard(d){
+  document.getElementById('cardName').textContent=d.name;
+  document.getElementById('cardDob').textContent=d.dob;
+  document.getElementById('cardCountry').textContent=d.country;
+  document.getElementById('cardOrg').textContent=d.org;
+  document.getElementById('cardGender').textContent=d.gender;
+  document.getElementById('cardLocation').textContent=d.location;
+  document.getElementById('cardLanguages').textContent=d.languages;
+  document.getElementById('cardExpiry').textContent=d.expiry;
+  document.getElementById('cardID').textContent=d.id;
+  if(d.photo&&d.photo.startsWith('data:')){
+    document.getElementById('cardPhoto').src=d.photo;
+    document.getElementById('cardPhoto').style.display='block';
+    document.getElementById('cardPhotoPlaceholder').style.display='none';
+  } else {
+    document.getElementById('cardPhoto').style.display='none';
+    document.getElementById('cardPhotoPlaceholder').style.display='block';
+  }
+  var qr=document.getElementById('qrcode');
+  qr.innerHTML='';
+  new QRCode(qr,{text:d.id+' | '+d.name,width:90,height:90,colorDark:'#0f1923',colorLight:'#ffffff'});
+}
 
-
-document.getElementById('cardName').innerText=name
-
-document.getElementById('cardDob').innerText=dob
-
-document.getElementById('cardCountry').innerText=country
-
-document.getElementById('cardOrg').innerText=org
-
-document.getElementById('cardID').innerText=id
-
-
-let qrContainer=document.getElementById('qrcode')
-qrContainer.innerHTML=""
-
-new QRCode(qrContainer,{
-text:id,
-width:150,
-height:150
-})
-
-
-document.getElementById('idCard').style.display='block'
-
+/* ── VERIFY ── */
+function switchMethod(id,btn){
+  document.querySelectorAll('.verify-method').forEach(function(m){m.classList.remove('active')});
+  document.querySelectorAll('.method-tab').forEach(function(b){b.classList.remove('active')});
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('verifyResult').style.display='none';
 }
 
 function verifyIdentity(){
-
-const input=document.getElementById('verifyID').value
-
-if(storedIdentity && input===storedIdentity.id){
-
-document.getElementById('verifyResult').classList.remove('hidden')
-
-document.getElementById('verifyData').innerText=
-"Name: "+storedIdentity.name+" | Country: "+storedIdentity.country+" | Verified by: "+storedIdentity.org
-
-}else{
-alert('Identity not found')
+  var input=document.getElementById('verifyID').value.trim();
+  if(!input){toast('Please enter an ID number','error');return}
+  showVerifyResult(identityDB.find(function(i){return i.id===input}),input);
 }
 
+function verifyByName(){
+  var input=document.getElementById('verifyName').value.trim().toLowerCase();
+  if(!input){toast('Please enter a name','error');return}
+  showVerifyResult(identityDB.find(function(i){return i.name.toLowerCase().includes(input)}),input);
 }
 
+function showVerifyResult(found,query){
+  var el=document.getElementById('verifyResult');
+  el.style.display='block';
+  el.className='verify-result '+(found?'success':'fail');
+  document.getElementById('resultIcon').textContent=found?'✅':'❌';
+  document.getElementById('resultTitle').textContent=found?'Identity Verified':'Identity Not Found';
+  document.getElementById('resultSubtitle').textContent=found?'Record confirmed for "'+found.name+'" — issued by '+found.org:'No matching record found for "'+query+'"';
+  var body=document.getElementById('resultBody');
+  if(found){
+    body.style.display='block';
+    document.getElementById('resultFields').innerHTML=
+      '<div class="result-field"><label>Full Name</label><span>'+found.name+'</span></div>'+
+      '<div class="result-field"><label>Date of Birth</label><span>'+found.dob+'</span></div>'+
+      '<div class="result-field"><label>Country</label><span>'+found.country+'</span></div>'+
+      '<div class="result-field"><label>Issued By</label><span>'+found.org+'</span></div>'+
+      '<div class="result-field"><label>ID Number</label><span style="font-family:monospace">'+found.id+'</span></div>'+
+      '<div class="result-field"><label>Issued On</label><span>'+found.issuedAt+'</span></div>'+
+      '<div class="result-field"><label>Valid Until</label><span>'+found.expiry+'</span></div>'+
+      '<div class="result-field"><label>Status</label><span><span class="tag tag-green">&#9679; Active</span></span></div>';
+  } else { body.style.display='none'; }
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ── REGISTRY ── */
+function setFilter(f,btn){
+  activeFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  renderRegistry();
+}
+
+function renderRegistry(){
+  var q=(document.getElementById('searchInput')?document.getElementById('searchInput').value:'').toLowerCase();
+  var today=new Date().toISOString().split('T')[0];
+  var list=identityDB.filter(function(i){
+    var ms=!q||i.name.toLowerCase().includes(q)||i.country.toLowerCase().includes(q)||i.id.toLowerCase().includes(q);
+    var exp=i.expiry!=='No Expiry'&&i.expiry<today;
+    var mf=activeFilter==='all'||(activeFilter==='expired'&&exp)||(activeFilter==='active'&&!exp);
+    return ms&&mf;
+  });
+  var container=document.getElementById('historyList');
+  if(list.length===0){
+    container.innerHTML='<div class="empty-state"><div class="empty-icon">🪪</div><p>'+(identityDB.length===0?'No identities created yet.':'No results match your search.')+'</p></div>';
+    return;
+  }
+  container.innerHTML=list.map(function(i){
+    return '<div class="history-item" onclick="openModal(\''+i.id+'\')">'+
+      '<div class="history-avatar">'+(i.photo&&i.photo.startsWith('data:')?'<img src="'+i.photo+'" alt="">':'👤')+'</div>'+
+      '<div class="history-info"><div class="history-name">'+i.name+'</div><div class="history-meta">'+i.country+' &middot; DOB: '+i.dob+' &middot; '+i.org+'</div></div>'+
+      '<div class="history-id">'+i.id+'</div></div>';
+  }).join('');
+}
+
+function openModal(id){
+  var found=identityDB.find(function(i){return i.id===id});
+  if(!found) return;
+  document.getElementById('modalTitle').textContent=found.name;
+  document.getElementById('modalBody').innerHTML=
+    '<div style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px">'+
+      '<div style="width:72px;height:72px;border-radius:12px;background:var(--teal-dim);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;overflow:hidden">'+(found.photo&&found.photo.startsWith('data:')?'<img src="'+found.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:12px">':'👤')+'</div>'+
+      '<div><div style="font-size:1.1rem;font-weight:600">'+found.name+'</div><div style="font-size:13px;color:var(--muted);margin-top:4px">'+found.country+' &middot; '+found.org+'</div><div style="margin-top:8px"><span class="tag tag-green">&#9679; Active</span> &nbsp;<span style="font-family:monospace;font-size:12px;color:var(--muted)">'+found.id+'</span></div></div>'+
+    '</div>'+
+    '<hr class="divider" style="margin:16px 0">'+
+    '<div class="result-fields">'+
+      '<div class="result-field"><label>Date of Birth</label><span>'+found.dob+'</span></div>'+
+      '<div class="result-field"><label>Gender</label><span>'+found.gender+'</span></div>'+
+      '<div class="result-field"><label>Languages</label><span>'+found.languages+'</span></div>'+
+      '<div class="result-field"><label>Location</label><span>'+found.location+'</span></div>'+
+      '<div class="result-field"><label>Org Contact</label><span>'+found.orgContact+'</span></div>'+
+      '<div class="result-field"><label>Case Ref</label><span>'+found.caseNum+'</span></div>'+
+      '<div class="result-field"><label>Issued On</label><span>'+found.issuedAt+'</span></div>'+
+      '<div class="result-field"><label>Valid Until</label><span>'+found.expiry+'</span></div>'+
+    '</div>'+
+    (found.notes?'<hr class="divider" style="margin:16px 0"><div style="font-size:13px;color:var(--muted)"><strong>Notes:</strong> '+found.notes+'</div>':'')+
+    '<hr class="divider" style="margin:16px 0">'+
+    '<div class="btn-row"><button class="btn-primary" style="background:var(--red)" onclick="deleteIdentity(\''+found.id+'\')">&#128465; Remove Record</button><button class="btn-ghost" onclick="closeModal()">Close</button></div>';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open')}
+
+function deleteIdentity(id){
+  identityDB=identityDB.filter(function(i){return i.id!==id});
+  saveDB(currentUser,identityDB);
+  updateStatCount();
+  closeModal();
+  renderRegistry();
+  toast('Record removed from registry','info');
+}
+
+/* ── COPY / DOWNLOAD ── */
+function copyIDNumber(){
+  if(!currentIdentity) return;
+  navigator.clipboard.writeText(currentIdentity.id).then(function(){toast('ID number copied!','success')});
+}
+
+function downloadCard(){
+  if(!currentIdentity) return;
+  var html=document.getElementById('printableCard').outerHTML;
+  var blob=new Blob(['<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;padding:40px;background:#f5f5f5}</style></head><body>'+html+'</body></html>'],{type:'text/html'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='ID-'+currentIdentity.id+'.html';
+  a.click();
+  toast('Card downloaded!','success');
+}
+
+/* ── TOAST ── */
+function toast(msg,type){
+  type=type||'info';
+  var container=document.getElementById('toastContainer');
+  var t=document.createElement('div');
+  t.className='toast '+type;
+  t.textContent=msg;
+  container.appendChild(t);
+  setTimeout(function(){t.remove()},3500);
+}
+
+/* ── MODAL BACKDROP ── */
+document.getElementById('modalOverlay').addEventListener('click',function(e){
+  if(e.target===document.getElementById('modalOverlay')) closeModal();
+});
 </script>
-
 </body>
 </html>
